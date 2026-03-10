@@ -1,0 +1,26 @@
+# ─── Environment Variables ────────────────────────────────────────────────────
+# .env MUST NEVER be committed. It contains live API keys.
+# Only .env.example (with placeholder values) is committed.
+.env
+.env.local
+.env.*.local
+
+# ─── Build Output ─────────────────────────────────────────────────────────────
+dist/
+build/
+
+# ─── Dependencies ─────────────────────────────────────────────────────────────
+node_modules/
+
+# ─── Logs ─────────────────────────────────────────────────────────────────────
+logs/
+*.log
+
+# ─── Test Coverage ────────────────────────────────────────────────────────────
+coverage/
+
+# ─── OS / Editor ──────────────────────────────────────────────────────────────
+.DS_Store
+.idea/
+.vscode/
+*.swp

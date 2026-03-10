@@ -1,0 +1,68 @@
+{
+  "compilerOptions": {
+    // ── Target & Module ────────────────────────────────────────────────────────
+    // Node 20 supports ES2022 natively; CommonJS output ensures compatibility
+    // with the full npm ecosystem without ESM interop overhead.
+    "target":            "ES2022",
+    "module":            "CommonJS",
+    "lib":               ["ES2022"],
+
+    // ── Module Resolution ──────────────────────────────────────────────────────
+    "moduleResolution":  "node",
+    "esModuleInterop":   true,
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
+
+    // ── Output ─────────────────────────────────────────────────────────────────
+    "outDir":            "./dist",
+    "rootDir":           "./src",
+    "declaration":       true,
+    "declarationMap":    true,
+    "sourceMap":         true,
+
+    // ── Strict Mode (full suite) ───────────────────────────────────────────────
+    // All strict flags enabled — enforces contract discipline across all members'
+    // shared types, preventing silent undefined/null failures at the gateway layer.
+    "strict":                         true,
+    "noImplicitAny":                  true,
+    "strictNullChecks":               true,
+    "strictFunctionTypes":            true,
+    "strictBindCallApply":            true,
+    "strictPropertyInitialization":   true,
+    "noImplicitThis":                 true,
+    "useUnknownInCatchVariables":     true,
+    "alwaysStrict":                   true,
+
+    // ── Additional Checks ──────────────────────────────────────────────────────
+    "noUnusedLocals":            true,
+    "noUnusedParameters":        true,
+    "noImplicitReturns":         true,
+    "noFallthroughCasesInSwitch": true,
+    "forceConsistentCasingInFileNames": true,
+
+    // ── Experimental (required for Genkit decorators) ─────────────────────────
+    "experimentalDecorators":        true,
+    "emitDecoratorMetadata":         true,
+
+    // ── Path Aliases ───────────────────────────────────────────────────────────
+    // Absolute imports prevent brittle relative paths across deep module trees.
+    "baseUrl":  ".",
+    "paths": {
+      "@/config/*":     ["src/config/*"],
+      "@/logger/*":     ["src/logger/*"],
+      "@/middleware/*": ["src/middleware/*"],
+      "@/routes/*":     ["src/routes/*"],
+      "@/schemas/*":    ["src/schemas/*"],
+      "@/store/*":      ["src/store/*"],
+      "@/types/*":      ["src/types/*"]
+    },
+
+    // ── Skip Lib Checks ────────────────────────────────────────────────────────
+    // Avoids compilation failures from type inconsistencies in third-party
+    // declaration files (common with Genkit alpha/beta packages).
+    "skipLibCheck": true
+  },
+
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules", "dist", "tests", "**/*.test.ts"]
+}
