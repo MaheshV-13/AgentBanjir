@@ -18,13 +18,7 @@ const config: Config = {
 
   // Resolve path aliases so @/config/*, @/store/*, etc. work in tests.
   moduleNameMapper: {
-    "^@/config/(.*)$":     "<rootDir>/src/config/$1",
-    "^@/logger/(.*)$":     "<rootDir>/src/logger/$1",
-    "^@/middleware/(.*)$": "<rootDir>/src/middleware/$1",
-    "^@/routes/(.*)$":     "<rootDir>/src/routes/$1",
-    "^@/schemas/(.*)$":    "<rootDir>/src/schemas/$1",
-    "^@/store/(.*)$":      "<rootDir>/src/store/$1",
-    "^@/types/(.*)$":      "<rootDir>/src/types/$1",
+    "^@/(.*)$": "<rootDir>/src/$1"
   },
 
   // ts-jest configuration — use the project tsconfig but relax noUnusedLocals

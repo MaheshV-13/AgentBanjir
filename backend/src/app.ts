@@ -14,7 +14,7 @@
 import express, { type Application, type Request, type Response } from "express";
 import helmet                from "helmet";
 import cors                  from "cors";
-import rateLimit             from "express-rate-limit";
+
 
 import { corsOptions }       from "@/middleware/corsConfig";
 import { globalRateLimit }   from "@/middleware/rateLimitConfig";
