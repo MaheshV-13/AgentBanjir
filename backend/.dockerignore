@@ -1,0 +1,50 @@
+# =============================================================================
+# .dockerignore — AgentBanjir Backend
+# =============================================================================
+# Excludes files from the Docker build context sent to the daemon.
+# A lean build context speeds up `docker build` and `gcloud builds submit`
+# by not uploading files that the Dockerfile never COPYs.
+# =============================================================================
+
+# ── Never committed, never in image ──────────────────────────────────────────
+.env
+.env.local
+.env.*.local
+
+# ── Dependencies — reinstalled cleanly inside the image ──────────────────────
+node_modules/
+
+# ── Build output — rebuilt inside the image by `npm run build` ───────────────
+dist/
+
+# ── Test coverage reports — not needed in the build context ──────────────────
+coverage/
+
+# ── Logs ──────────────────────────────────────────────────────────────────────
+logs/
+*.log
+
+# ── Docker meta-files — not needed inside the image ──────────────────────────
+Dockerfile
+.dockerignore
+
+# ── Version control ───────────────────────────────────────────────────────────
+.git/
+.gitignore
+.gitattributes
+
+# ── Editor / OS artifacts ─────────────────────────────────────────────────────
+.vscode/
+.idea/
+.DS_Store
+*.swp
+*.swo
+Thumbs.db
+
+# ── CI / CD ───────────────────────────────────────────────────────────────────
+.github/
+*.yml
+*.yaml
+
+# ── Deployment scripts — not needed inside the image ─────────────────────────
+deploy.sh

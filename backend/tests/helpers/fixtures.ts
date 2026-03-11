@@ -59,8 +59,14 @@ export function buildEnrichedSignal(
 
 // ─── Invalid Input Variants ───────────────────────────────────────────────────
 
-/** Collection of bodies that must each produce a 400 VALIDATION_ERROR response. */
-export const INVALID_INPUT_CASES: Array<{ label: string; body: unknown }> = [
+/**
+ * Collection of bodies that must each produce a 400 VALIDATION_ERROR response.
+ *
+ * Typed as Record<string, unknown> rather than unknown: every case is an object
+ * literal, and this type satisfies Supertest's .send() signature in strict mode
+ * without requiring a cast at every call site.
+ */
+export const INVALID_INPUT_CASES: Array<{ label: string; body: object }> = [
   {
     label: "missing gps_coordinates",
     body:  { image_base64: "a".repeat(200), raw_message: "Help!", simulated_user_verified: true },

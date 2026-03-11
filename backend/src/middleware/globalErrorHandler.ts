@@ -55,9 +55,9 @@ export class AppError extends Error {
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function globalErrorHandler(
   err:  unknown,
-  req:  Request,
+  _req:  Request,
   res:  Response,
-  next: NextFunction  // Required for Express error handler recognition.
+  _next: NextFunction  // Required for Express error handler recognition.
 ): void {
   const requestId  = (res.locals["requestId"] as string | undefined) ?? "unknown";
   const timestamp  = new Date().toISOString();

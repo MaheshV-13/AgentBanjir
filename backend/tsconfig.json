@@ -48,13 +48,7 @@
     // Absolute imports prevent brittle relative paths across deep module trees.
     "baseUrl":  ".",
     "paths": {
-      "@/config/*":     ["src/config/*"],
-      "@/logger/*":     ["src/logger/*"],
-      "@/middleware/*": ["src/middleware/*"],
-      "@/routes/*":     ["src/routes/*"],
-      "@/schemas/*":    ["src/schemas/*"],
-      "@/store/*":      ["src/store/*"],
-      "@/types/*":      ["src/types/*"]
+      "@/*": ["src/*"]
     },
 
     // ── Skip Lib Checks ────────────────────────────────────────────────────────
