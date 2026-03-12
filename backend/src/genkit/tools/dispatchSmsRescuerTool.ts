@@ -24,6 +24,7 @@
  */
 import { v4 as uuidv4 } from "uuid";
 import { ai } from "@/genkit/genkit.config";
+import { config } from "@/config/env";
 import { logger } from "@/logger/logger";
 import {
   SmsDispatchInputSchema,
@@ -52,7 +53,7 @@ export const dispatchSmsRescuerTool = ai.defineTool(
 
     // ── Simulation block ──────────────────────────────────────────────────────
     // Production: replace with Twilio REST API call.
-    const recipient = process.env["SMS_MOCK_RECIPIENT"] ?? "+60123456789";
+    const recipient = config.smsMockRecipient;
 
     // Body constructed for production parity — not sent in simulation.
     // DO NOT log smsBody: it contains GPS coordinates (operationally sensitive).

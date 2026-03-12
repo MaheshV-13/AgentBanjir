@@ -15,7 +15,6 @@ import "dotenv/config";
 const REQUIRED_VARS = [
   "GEMINI_API_KEY",
   "GOOGLE_CLOUD_PROJECT",
-  
 ] as const;
 
 // ─── Optional Variable Defaults ───────────────────────────────────────────────
@@ -23,7 +22,7 @@ const PORT_DEFAULT            = "8080";
 const NODE_ENV_DEFAULT        = "development";
 const CORS_ORIGIN_DEFAULT     = "http://localhost:5173";
 const LOG_LEVEL_DEFAULT       = "info";
-const SMS_MOCK_RECIPIENT = "+60123456789";
+const SMS_MOCK_RECIPIENT_DEFAULT = "+60123456789";
 
 /**
  * Validates that all required environment variables are present.
@@ -70,6 +69,12 @@ export interface AppConfig {
   readonly logToFile: boolean;
   /** Convenience flag — true in production environment. */
   readonly isProduction: boolean;
+  /**
+   * Mock SMS recipient phone number for hackathon simulation mode.
+   * Production: resolve from rescue coordinator registry via Vertex AI Search.
+   * Defaults to "+60123456789" if SMS_MOCK_RECIPIENT is not set in .env.
+   */
+  readonly smsMockRecipient: string;
 }
 
 const rawNodeEnv = process.env["NODE_ENV"] ?? NODE_ENV_DEFAULT;
@@ -86,4 +91,5 @@ export const config: Readonly<AppConfig> = Object.freeze({
   logLevel:           process.env["LOG_LEVEL"] ?? LOG_LEVEL_DEFAULT,
   logToFile:          process.env["LOG_TO_FILE"] === "true",
   isProduction:       nodeEnv === "production",
+  smsMockRecipient:   process.env["SMS_MOCK_RECIPIENT"] ?? SMS_MOCK_RECIPIENT_DEFAULT,
 });
