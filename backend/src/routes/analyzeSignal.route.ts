@@ -20,6 +20,7 @@ import { MasterInputSchema }  from "@/schemas/masterInputSchema";
 import { signalStore }        from "@/store/signalStore";
 import { AppError }           from "@/middleware/globalErrorHandler";
 import { logger }             from "@/logger/logger";
+import { runFloodCrisisOrchestration } from "@/genkit/flows/floodCrisisOrchestrationFlow";
 import type {
   MasterInputSignal,
   EnrichedSignal,
@@ -52,19 +53,7 @@ async function processSignalStub(
   };
 }
 
-/** Temporary stub — Member 2's Genkit orchestration flow (to be replaced). */
-async function floodCrisisOrchestrationFlowStub(
-  signal: Partial<EnrichedSignal>
-): Promise<EnrichedSignal["flow_result"]> {
-  // Remove when Member 2's real floodCrisisOrchestrationFlow is integrated.
-  void signal;
-  return {
-    recommended_status: "Pending_Human_Review",
-    actions_taken: [
-      { tool: "db_log_tool", success: true, details: "Signal logged to incident DB" },
-    ],
-  };
-}
+
 
 // ─── Router ───────────────────────────────────────────────────────────────────
 
@@ -100,38 +89,46 @@ analyzeSignalRouter.post(
         throw new AppError("UPSTREAM_AI_FAILURE", "AI extraction service unavailable.", 502);
       }
 
-      // ── Step 3: Member 2 — Genkit Orchestration Flow ───────────────────────
-      let flowResult: EnrichedSignal["flow_result"];
-      try {
-        flowResult = await floodCrisisOrchestrationFlowStub(member1Result);
-      } catch (err) {
-        const msg = err instanceof Error ? err.message : String(err);
-        // Non-fatal: log the failure and continue with default status.
-        logger.warn("Member 2 Genkit flow failure — degraded mode", {
-          req_id:   requestId,
-          error:    msg,
-          fallback: "Pending_Human_Review",
-        });
-        flowResult = {
-          recommended_status: "Pending_Human_Review",
-          actions_taken:      [],
-        };
-      }
-
-      // ── Step 4: Orchestration — Merge + UUID Assignment ────────────────────
-      const now             = new Date().toISOString();
-      const enrichedSignal: EnrichedSignal = {
+      // ── Step 3: Gateway — Base Signal Construction (UUID Assignment) ───────
+      // We must construct the EnrichedSignal FIRST because Member 2's flow
+      // requires the generated `id` to log to the DB and send SMS messages.
+      const now = new Date().toISOString();
+      let enrichedSignal: EnrichedSignal = {
         id:                  crypto.randomUUID(),
         gps_coordinates:     validatedInput.gps_coordinates,
         severity_level:      member1Result.severity_level      ?? "Low",
         ai_confidence_score: member1Result.ai_confidence_score ?? 0,
         specific_needs:      member1Result.specific_needs      ?? [],
         nearest_boats:       member1Result.nearest_boats,
-        status:              flowResult?.recommended_status    ?? "Pending_Human_Review",
-        flow_result:         flowResult,
+        status:              "Pending_Human_Review", // Default starting status
         created_at:          now,
         updated_at:          now,
       };
+
+      // ── Step 4: Member 2 — Genkit Orchestration Flow (LIVE) ────────────────
+      try {
+        const flowResult = await runFloodCrisisOrchestration(enrichedSignal);
+        
+        // Merge the autonomous decisions back into our signal
+        enrichedSignal = {
+          ...enrichedSignal,
+          status:      flowResult.recommended_status,
+          flow_result: flowResult,
+          updated_at:  new Date().toISOString(),
+        };
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
+        logger.warn("Member 2 Genkit flow failure — degraded mode", {
+          req_id:   requestId,
+          error:    msg,
+          fallback: "Pending_Human_Review",
+        });
+        // On total flow crash, we degrade gracefully and keep the default status
+        enrichedSignal.flow_result = {
+          recommended_status: "Pending_Human_Review",
+          actions_taken:      [{ tool: "system", success: false, details: "Flow crashed" }],
+        };
+      }
 
       // ── Step 5: Persist to In-Memory Store ─────────────────────────────────
       signalStore.upsert(enrichedSignal);
