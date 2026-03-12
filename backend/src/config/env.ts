@@ -15,6 +15,7 @@ import "dotenv/config";
 const REQUIRED_VARS = [
   "GEMINI_API_KEY",
   "GOOGLE_CLOUD_PROJECT",
+  
 ] as const;
 
 // ─── Optional Variable Defaults ───────────────────────────────────────────────
@@ -22,6 +23,7 @@ const PORT_DEFAULT            = "8080";
 const NODE_ENV_DEFAULT        = "development";
 const CORS_ORIGIN_DEFAULT     = "http://localhost:5173";
 const LOG_LEVEL_DEFAULT       = "info";
+const SMS_MOCK_RECIPIENT = "+60123456789";
 
 /**
  * Validates that all required environment variables are present.
