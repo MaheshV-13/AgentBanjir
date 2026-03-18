@@ -23,14 +23,14 @@
  * floodCrisisOrchestrationFlow catches tool errors and degrades gracefully.
  */
 import { v4 as uuidv4 } from "uuid";
-import { ai } from "@/genkit/genkit.config";
+import { ai } from "@/orchestrator/genkit.config";
 import { config } from "@/config/env";
 import { logger } from "@/logger/logger";
 import {
   SmsDispatchInputSchema,
   SmsDispatchOutputSchema,
   type SmsDispatchOutput,
-} from "@/genkit/schemas/agentSchemas";
+} from "@/orchestrator/schemas/agentSchemas";
 
 export const dispatchSmsRescuerTool = ai.defineTool(
   {

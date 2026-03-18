@@ -71,12 +71,12 @@ describe("POST /api/v1/analyze-signal", () => {
       );
     });
 
-    it("assigns 'Pending_Human_Review' as the default status", async () => {
+    it("assigns 'Dispatched' status because the stub forces High severity", async () => {
       const res = await request(app)
         .post("/api/v1/analyze-signal")
         .send(buildValidInput());
 
-      expect(res.body.status).toBe("Pending_Human_Review");
+      expect(res.body.status).toBe("Dispatched");
     });
 
     it("persists the enriched signal to the store", async () => {

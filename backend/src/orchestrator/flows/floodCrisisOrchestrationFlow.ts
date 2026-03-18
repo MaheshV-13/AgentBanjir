@@ -20,7 +20,7 @@
  * The Team Lead imports `runFloodCrisisOrchestration` from this file and calls
  * it directly — no HTTP transport layer in this module.
  *
- *   import { runFloodCrisisOrchestration } from "@/genkit/flows/floodCrisisOrchestrationFlow";
+ *   import { runFloodCrisisOrchestration } from "@/orchestrator/flows/floodCrisisOrchestrationFlow";
  *   const flowResult = await runFloodCrisisOrchestration(enrichedSignal);
  *
  * ── Severity routing matrix (SDD §8.1) ───────────────────────────────────────
@@ -36,14 +36,14 @@
  *   3. WARN log emitted with failure reason (no PII)
  *   4. Gracefully degraded FlowResult returned — never a hard failure
  */
-import { ai } from "@/genkit/genkit.config";
+import { ai } from "@/orchestrator/genkit.config";
 import { logger } from "@/logger/logger";
-import { dispatchSmsRescuerTool } from "@/genkit/tools/dispatchSmsRescuerTool";
-import { logEventToDatabaseTool } from "@/genkit/tools/logEventToDatabaseTool";
+import { dispatchSmsRescuerTool } from "@/orchestrator/tools/dispatchSmsRescuerTool";
+import { logEventToDatabaseTool } from "@/orchestrator/tools/logEventToDatabaseTool";
 import {
   EnrichedSignalSchema,
   FlowResultSchema,
-} from "@/genkit/schemas/agentSchemas";
+} from "@/orchestrator/schemas/agentSchemas";
 import type {
   EnrichedSignal,
   FlowResult,
@@ -285,7 +285,7 @@ function _assembleResult(
  *
  * @example Gateway usage (Team Lead's route handler):
  * ```typescript
- * import { runFloodCrisisOrchestration } from "@/genkit/flows/floodCrisisOrchestrationFlow";
+ * import { runFloodCrisisOrchestration } from "@/orchestrator/flows/floodCrisisOrchestrationFlow";
  *
  * const flowResult = await runFloodCrisisOrchestration(enrichedSignal);
  * // flowResult: { recommended_status, actions_taken }

@@ -20,7 +20,7 @@ import { MasterInputSchema }  from "@/schemas/masterInputSchema";
 import { signalStore }        from "@/store/signalStore";
 import { AppError }           from "@/middleware/globalErrorHandler";
 import { logger }             from "@/logger/logger";
-import { runFloodCrisisOrchestration } from "@/genkit/flows/floodCrisisOrchestrationFlow";
+import { runFloodCrisisOrchestration } from "@/orchestrator/flows/floodCrisisOrchestrationFlow";
 import type {
   MasterInputSignal,
   EnrichedSignal,

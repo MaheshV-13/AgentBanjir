@@ -27,14 +27,14 @@
  *     .set(record);
  */
 import { v4 as uuidv4 } from "uuid";
-import { ai } from "@/genkit/genkit.config";
+import { ai } from "@/orchestrator/genkit.config";
 import { logger } from "@/logger/logger";
 import {
   DbLogInputSchema,
   DbLogOutputSchema,
   type DbLogInput,
   type DbLogOutput,
-} from "@/genkit/schemas/agentSchemas";
+} from "@/orchestrator/schemas/agentSchemas";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // In-memory dispatch event log (simulation only)
