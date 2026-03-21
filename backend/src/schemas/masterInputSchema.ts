@@ -28,11 +28,13 @@ export const MasterInputSchema = z
     /**
      * Base64-encoded JPEG or PNG image of the flood scene.
      * 6 MB body limit is enforced at the body-parser layer.
-     * Min-length check prevents empty strings from reaching Gemini.
+     * Allowed to be an empty string if the user submits a text-only signal.
      */
     image_base64: z
       .string({ required_error: "image_base64 is required" })
-      .min(100, { message: "image_base64 appears to be empty or invalid" }),
+      .refine((val) => val === '' || val.length >= 100, {
+        message: "image_base64 appears to be invalid (must be empty or >= 100 chars)",
+      }),
 
     /**
      * Free-text distress message from the citizen. Accepts BM or EN.
