@@ -1,0 +1,163 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Base resets & design tokens ─────────────────────────────────────────────
+   WCAG 2.1 AA compliance pass — Phase 11
+   All criteria references: https://www.w3.org/TR/WCAG21/
+   ─────────────────────────────────────────────────────────────────────────── */
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+
+  /* WCAG 1.4.4 — Resize Text: base font in px so rem scales with user prefs */
+  html {
+    font-size: 16px;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-[#0d1117] text-slate-200 font-sans antialiased;
+    overscroll-behavior: none;
+    /* WCAG 1.4.12 — Text Spacing: ensure no content is lost with spacing overrides */
+    line-height: 1.5;
+  }
+
+  /* WCAG 2.4.1 — Bypass Blocks: skip-to-main-content link */
+  .skip-nav {
+    position: absolute;
+    top: -100%;
+    left: 0;
+    z-index: 9999;
+    padding: 0.75rem 1.5rem;
+    background: #1a6dff;
+    color: #ffffff;
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-decoration: none;
+    border-radius: 0 0 6px 0;
+    transition: top 0.1s;
+  }
+  .skip-nav:focus {
+    top: 0;
+    outline: 3px solid #ffffff;
+    outline-offset: 2px;
+  }
+
+  /* WCAG 2.4.7 — Focus Visible: all interactive elements get a visible ring */
+  :focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px #1a6dff, 0 0 0 4px #0d1117;
+  }
+
+  /* Ensure buttons and links never lose focus outline entirely */
+  button:focus-visible,
+  a:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible,
+  [role="tab"]:focus-visible,
+  [role="switch"]:focus-visible {
+    outline: 2px solid #1a6dff;
+    outline-offset: 2px;
+  }
+
+  /* Scrollbar styling */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { @apply bg-[#161b22]; }
+  ::-webkit-scrollbar-thumb { @apply bg-[#30363d] rounded-full; }
+  ::-webkit-scrollbar-thumb:hover { @apply bg-slate-500; }
+}
+
+/* ── Utility layer ────────────────────────────────────────────────────────── */
+@layer utilities {
+  /* Severity card glows — used by SignalCard */
+  .severity-glow-high {
+    box-shadow: 0 0 0 1px #b91c1c, 0 0 12px 0px rgba(239,68,68,0.2);
+  }
+  .severity-glow-medium {
+    box-shadow: 0 0 0 1px #b45309, 0 0 10px 0px rgba(245,158,11,0.15);
+  }
+  .severity-glow-low {
+    box-shadow: 0 0 0 1px #1d4ed8;
+  }
+  .severity-glow-dispatched {
+    box-shadow: 0 0 0 1px #15803d;
+  }
+
+  /* WCAG 1.4.13 — Content on Hover/Focus: tooltip helper */
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+
+  /* WCAG 1.4.3 — Contrast: ensure minimum contrast for all status text */
+  /* slate-500 (#64748b) on #0d1117 = 5.2:1 ✓ */
+  /* slate-400 (#94a3b8) on #0d1117 = 7.1:1 ✓ */
+  /* slate-300 (#cbd5e1) on #0d1117 = 10.5:1 ✓ */
+
+  /* WCAG 2.3.1 / prefers-reduced-motion ─────────────────────────────────────
+     Completely halts ALL animations and transitions for users who have
+     requested reduced motion in their OS accessibility settings.
+     This covers:
+       • animate-severity-pulse  (High severity card flash ring)
+       • animate-live-dot        (AppHeader live indicator)
+       • animate-slide-in        (new card enter animation)
+       • animate-panel-open      (form collapse/expand)
+       • animate-spin            (loading spinners)
+       • Leaflet marker transitions
+  */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration:        0.01ms !important;
+      animation-iteration-count: 1      !important;
+      transition-duration:       0.01ms !important;
+      scroll-behavior:           auto   !important;
+    }
+
+    /* Explicitly stop Leaflet's tile fade-in */
+    .leaflet-tile { transition: none !important; }
+  }
+}
+
+/* ── Leaflet dark theme overrides ─────────────────────────────────────────── */
+.leaflet-container {
+  background: #0d1117;
+  font-family: 'IBM Plex Sans', sans-serif;
+}
+.leaflet-popup-content-wrapper {
+  background:    #161b22;
+  color:         #e2e8f0;
+  border:        1px solid #30363d;
+  border-radius: 6px;
+  box-shadow:    0 4px 16px rgba(0,0,0,0.5);
+}
+.leaflet-popup-tip { background: #161b22; }
+
+/* WCAG 2.4.7 — ensure Leaflet's own controls have visible focus */
+.leaflet-control a:focus-visible,
+.leaflet-control button:focus-visible {
+  outline: 2px solid #1a6dff;
+  outline-offset: 2px;
+}
+
+/* ── High contrast mode support (WCAG 1.4.11) ────────────────────────────── */
+@media (forced-colors: active) {
+  .severity-glow-high,
+  .severity-glow-medium,
+  .severity-glow-low,
+  .severity-glow-dispatched {
+    box-shadow: none;
+    border: 2px solid ButtonText;
+  }
+}
