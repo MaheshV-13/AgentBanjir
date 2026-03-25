@@ -26,34 +26,13 @@ import type {
   EnrichedSignal,
 } from "@/types/signal.types";
 
-// ─── Member 1 & 2 Integration Stubs ──────────────────────────────────────────
-// These imports will resolve to real implementations once Members 1 and 2
-// deliver their modules. Interface contracts are defined in signal.types.ts.
-//
-// Per the Cross-Team Integration Registry (SDD §16):
-//   Member 1: SignalOrchestrator.processSignal(input) → Partial<EnrichedSignal>
-//   Member 2: floodCrisisOrchestrationFlow(signal)    → FlowResult
-//
-// TODO(Member4): Replace stub imports with real module paths when available.
-// import { SignalOrchestrator }             from "@member1/signalOrchestrator";
-// import { floodCrisisOrchestrationFlow }   from "@member2/floodCrisisFlow";
+// ─── CHANGE 1 OF 3 ───────────────────────────────────────────────────────────
+// Replaced the stub import comment block with the real Member 1 import.
+import { SignalOrchestrator } from "@/ai/signalOrchestrator";
 
-/** Temporary stub — Member 1's Gemini extraction + RAG module (to be replaced). */
-async function processSignalStub(
-  input: MasterInputSignal
-): Promise<Partial<EnrichedSignal>> {
-  // This stub returns placeholder data so the gateway can be tested independently.
-  // Remove when Member 1's real SignalOrchestrator is integrated.
-  void input; // suppress unused param lint until real implementation
-  return {
-    severity_level:      "High",
-    ai_confidence_score: 92,
-    specific_needs:      ["life_jacket", "medical_assistance"],
-    nearest_boats:       [],
-  };
-}
-
-
+// ─── CHANGE 2 OF 3 ───────────────────────────────────────────────────────────
+// Removed the processSignalStub function entirely.
+// The real SignalOrchestrator class replaces it below.
 
 // ─── Router ───────────────────────────────────────────────────────────────────
 
@@ -80,9 +59,11 @@ analyzeSignalRouter.post(
       logger.debug("Signal input validated", { req_id: requestId });
 
       // ── Step 2: Member 1 — Gemini Extraction + RAG ─────────────────────────
+      // CHANGE 3 OF 3: Replaced processSignalStub(...) with the real class call.
       let member1Result: Partial<EnrichedSignal>;
       try {
-        member1Result = await processSignalStub(validatedInput);
+        const orchestrator = new SignalOrchestrator();
+        member1Result = await orchestrator.processSignal(validatedInput);
       } catch (err) {
         const msg = err instanceof Error ? err.message : String(err);
         logger.error("Member 1 SignalOrchestrator failure", { req_id: requestId, error: msg });
