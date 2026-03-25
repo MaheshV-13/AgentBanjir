@@ -1,0 +1,53 @@
+// ─── Prisma Schema for AgentBanjir ───────────────────────────────────────────
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Enums (Mapped from signal.types.ts) ─────────────────────────────────────
+
+enum SeverityLevel {
+  Low
+  Medium
+  High
+}
+
+enum SignalStatus {
+  Pending_Human_Review
+  Dispatched
+  Rejected
+}
+
+// ─── Core Entity ─────────────────────────────────────────────────────────────
+
+model Signal {
+  id                  String        @id @default(uuid())
+  
+  // GPS Coordinates flattened for efficient indexing
+  lat                 Float
+  lng                 Float
+  
+  severityLevel       SeverityLevel
+  aiConfidenceScore   Int
+  
+  // PostgreSQL natively supports string arrays
+  specificNeeds       String[]      
+
+  status              SignalStatus  @default(Pending_Human_Review)
+  
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+
+  // ─── Audit Snapshots (Stored as JSONB) ───
+  // We use JSONB here to preserve the exact state of the RAG context 
+  // and the Genkit actions at the exact millisecond the flow ran.
+  nearestBoats        Json?         
+  flowResult          Json?         
+
+  @@map("signals") // Standardizes the table name in Postgres
+}

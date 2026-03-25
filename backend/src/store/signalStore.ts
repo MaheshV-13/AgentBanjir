@@ -1,77 +1,108 @@
 /**
  * @module store/signalStore
  *
- * In-memory signal store — Map-backed ISignalStore implementation.
- *
- * For hackathon scope, a Map<string, EnrichedSignal> serves as the signal DB.
- * The ISignalStore interface (defined in signalStore.types.ts) makes this
- * implementation trivially swappable with a Firestore adapter in production
- * without changing any route handler code.
- *
- * Thread-safety note: Node.js is single-threaded; the Map is safe for
- * concurrent async access within a single Cloud Run container instance.
+ * Prisma-backed PostgreSQL implementation of the signal store.
+ * Replaces the legacy InMemorySignalStore for production persistence.
  */
-import type { EnrichedSignal, SeverityLevel, SignalStatus } from "@/types/signal.types";
-import type {
-  ISignalStore,
-  StoreHealthSnapshot,
-} from "@/store/signalStore.types";
+import { PrismaClient } from "@prisma/client";
+import type { 
+  EnrichedSignal, 
+  SeverityLevel, 
+  SignalStatus,
+  NearestBoat,
+  FlowResult 
+} from "@/types/signal.types";
+import type { StoreHealthSnapshot } from "@/store/signalStore.types";
 
-// ─── In-Memory Implementation ─────────────────────────────────────────────────
+const prisma = new PrismaClient();
 
-/**
- * Map-backed in-memory implementation of ISignalStore.
- * Exported as a singleton — all routes share the same instance.
- */
-class InMemorySignalStore implements ISignalStore {
-  private readonly store = new Map<string, EnrichedSignal>();
+// ─── Data Mappers ─────────────────────────────────────────────────────────────
 
-  /** {@inheritDoc ISignalStore.getAll} */
-  getAll(): EnrichedSignal[] {
-    return Array.from(this.store.values());
+/** Maps a Prisma database row back to the exact EnrichedSignal interface */
+function mapDbToSignal(dbRow: any): EnrichedSignal {
+  return {
+    id: dbRow.id,
+    gps_coordinates: {
+      lat: dbRow.lat,
+      lng: dbRow.lng,
+    },
+    severity_level:      dbRow.severityLevel as SeverityLevel,
+    ai_confidence_score: dbRow.aiConfidenceScore,
+    specific_needs:      dbRow.specificNeeds,
+    status:              dbRow.status as SignalStatus,
+    created_at:          dbRow.createdAt.toISOString(),
+    updated_at:          dbRow.updatedAt.toISOString(),
+    // Safely cast the JSONB fields back to their TypeScript interfaces
+    nearest_boats:       dbRow.nearestBoats ? (dbRow.nearestBoats as NearestBoat[]) : undefined,
+    flow_result:         dbRow.flowResult ? (dbRow.flowResult as FlowResult) : undefined,
+  };
+}
+
+// ─── Prisma Implementation ────────────────────────────────────────────────────
+
+class PrismaSignalStore {
+  
+  async getAll(): Promise<EnrichedSignal[]> {
+    const signals = await prisma.signal.findMany({
+      orderBy: { createdAt: "desc" }, // Always return newest first
+    });
+    return signals.map(mapDbToSignal);
   }
 
-  /** {@inheritDoc ISignalStore.getById} */
-  getById(id: string): EnrichedSignal | undefined {
-    return this.store.get(id);
+  async getById(id: string): Promise<EnrichedSignal | undefined> {
+    const signal = await prisma.signal.findUnique({ where: { id } });
+    return signal ? mapDbToSignal(signal) : undefined;
   }
 
-  /** {@inheritDoc ISignalStore.upsert} */
-  upsert(signal: EnrichedSignal): void {
-    this.store.set(signal.id, signal);
+  async upsert(signal: EnrichedSignal): Promise<void> {
+    await prisma.signal.upsert({
+      where: { id: signal.id },
+      update: {
+        status:            signal.status,
+        updatedAt:         new Date(signal.updated_at),
+        nearestBoats:      signal.nearest_boats ? (signal.nearest_boats as any) : null,
+        flowResult:        signal.flow_result ? (signal.flow_result as any) : null,
+      },
+      create: {
+        id:                signal.id,
+        lat:               signal.gps_coordinates.lat,
+        lng:               signal.gps_coordinates.lng,
+        severityLevel:     signal.severity_level,
+        aiConfidenceScore: signal.ai_confidence_score,
+        specificNeeds:     signal.specific_needs,
+        status:            signal.status,
+        createdAt:         new Date(signal.created_at),
+        updatedAt:         new Date(signal.updated_at),
+        nearestBoats:      signal.nearest_boats ? (signal.nearest_boats as any) : null,
+        flowResult:        signal.flow_result ? (signal.flow_result as any) : null,
+      },
+    });
   }
 
-  /** {@inheritDoc ISignalStore.updateStatus} */
-  updateStatus(id: string, status: SignalStatus): EnrichedSignal | undefined {
-    const existing = this.store.get(id);
-    if (!existing) return undefined;
-
-    // Construct a new object rather than mutating in place; aids debugging.
-    const updated: EnrichedSignal = {
-      ...existing,
-      status,
-      updated_at: new Date().toISOString(),
-    };
-    this.store.set(id, updated);
-    return updated;
+  async updateStatus(id: string, status: SignalStatus): Promise<EnrichedSignal | undefined> {
+    try {
+      const updated = await prisma.signal.update({
+        where: { id },
+        data: { status },
+      });
+      return mapDbToSignal(updated);
+    } catch (error) {
+      // Prisma throws an error if the record to update is not found
+      return undefined;
+    }
   }
 
-  /** {@inheritDoc ISignalStore.count} */
-  count(): number {
-    return this.store.size;
+  async count(): Promise<number> {
+    return await prisma.signal.count();
   }
 
-  /** {@inheritDoc ISignalStore.clear} */
-  clear(): void {
-    this.store.clear();
+  async clear(): Promise<void> {
+    await prisma.signal.deleteMany();
   }
 
-  /** {@inheritDoc ISignalStore.getHealthSnapshot} */
-  getHealthSnapshot(): StoreHealthSnapshot {
-    const signals = this.getAll();
+  async getHealthSnapshot(): Promise<StoreHealthSnapshot> {
+    const signals = await this.getAll();
 
-    // Initialise all counters to 0 so the snapshot is always fully populated,
-    // even if no signals of a given severity/status have been seen yet.
     const by_severity: Record<SeverityLevel, number> = { High: 0, Medium: 0, Low: 0 };
     const by_status: Record<SignalStatus, number> = {
       Pending_Human_Review: 0,
@@ -95,12 +126,4 @@ class InMemorySignalStore implements ISignalStore {
 
 // ─── Singleton Export ─────────────────────────────────────────────────────────
 
-/**
- * Singleton signal store instance.
- * Import this in route handlers:
- *   import { signalStore } from "@/store/signalStore";
- *
- * Import the interface for type annotations:
- *   import type { ISignalStore } from "@/store/signalStore.types";
- */
-export const signalStore: ISignalStore = new InMemorySignalStore();
+export const signalStore = new PrismaSignalStore();

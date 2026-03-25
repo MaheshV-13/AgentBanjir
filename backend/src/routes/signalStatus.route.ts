@@ -29,16 +29,15 @@ const StatusUpdateSchema = z.object({
  * @body    { status: "Dispatched" | "Rejected" }
  * @access  Public (no auth — hackathon scope)
  */
-signalStatusRouter.patch("/:id/status", (
+signalStatusRouter.patch("/:id/status", async (
   req: Request<{ id: string }>,
   res: Response,
   next: NextFunction
-): void => {
+): Promise<void> => {
   try {
     const { id }      = req.params;
     const requestId   = res.locals["requestId"] as string;
 
-    // Validate the request body against the narrow status schema.
     const parsed      = StatusUpdateSchema.safeParse(req.body);
 
     if (!parsed.success) {
@@ -52,8 +51,7 @@ signalStatusRouter.patch("/:id/status", (
 
     const newStatus = parsed.data.status as SignalStatus;
 
-    // Attempt to update; store returns undefined if the ID does not exist.
-    const updated = signalStore.updateStatus(id, newStatus);
+    const updated = await signalStore.updateStatus(id, newStatus); 
 
     if (!updated) {
       throw new AppError(
