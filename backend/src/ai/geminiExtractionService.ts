@@ -123,7 +123,7 @@ export async function extractFromGemini(
   });
 
   const response = await ai.generate({
-    model:  "googleai/gemini-2.0-flash",
+    model:  "googleai/gemini-2.5-flash",
     system: SYSTEM_PROMPT,
     prompt: promptParts,
     output: {
@@ -132,7 +132,6 @@ export async function extractFromGemini(
     },
     config: {
       temperature:     0.1, // Low temperature → deterministic extraction
-      maxOutputTokens: 512, // JSON payload is small; cap to reduce latency/cost
     },
   });
 

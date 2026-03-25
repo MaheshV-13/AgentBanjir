@@ -23,6 +23,24 @@ import {
   INVALID_INPUT_CASES,
 } from "../helpers/fixtures";
 
+// ─── MOCK THE AI ORCHESTRATOR ───────────────────────────────────────────────
+// Industry Best Practice: Never hit real LLMs during automated CI/CD testing.
+jest.mock("@/ai/signalOrchestrator", () => {
+  return {
+    SignalOrchestrator: class {
+      async processSignal() {
+        return {
+          severity_level: "High",
+          ai_confidence_score: 92,
+          specific_needs: ["life_jacket", "medical_assistance"],
+          nearest_boats: [],
+        };
+      }
+    }
+  };
+});
+// ────────────────────────────────────────────────────────────────────────────
+
 const app = createApp();
 
 describe("POST /api/v1/analyze-signal", () => {
