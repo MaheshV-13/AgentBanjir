@@ -1,14 +1,14 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { renderHook, act, waitFor } from '@testing-library/react'
-import { useOperatorActions } from 'src/hooks/useOperatorActions'
-import * as signalService from 'src/services/signalService'
-import { SignalProvider } from 'src/context/SignalContext'
+import { useOperatorActions } from '@/hooks/useOperatorActions'
+import * as signalService from '@/services/signalService'
+import { SignalProvider } from '@/context/SignalContext'
 import type { ReactNode } from 'react'
-import type { EnrichedSignal } from 'src/types/signal.types'
+import type { EnrichedSignal } from '@/types/signal.types'
 
 // ── Mocks ─────────────────────────────────────────────────────────────────────
 
-vi.mock('../src/services/signalService', () => ({
+vi.mock('@/services/signalService', () => ({
   updateSignalStatus:  vi.fn(),
   extractErrorMessage: vi.fn((e: unknown) => (e instanceof Error ? e.message : 'Unknown error')),
 }))
@@ -31,7 +31,7 @@ const wrapper = ({ children }: { children: ReactNode }) => (
 // ── Tests ─────────────────────────────────────────────────────────────────────
 
 describe('useOperatorActions', () => {
-  beforeEach(() => vi.clearAllMocks())
+  beforeEach(() => { vi.clearAllMocks() })
 
   it('isUpdating is false initially', () => {
     const { result } = renderHook(() => useOperatorActions(), { wrapper })

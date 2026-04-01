@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { fileToBase64 } from 'src/utils/base64Converter'
+import { fileToBase64 } from '@/utils/base64Converter'
 
 // ── FileReader mock ───────────────────────────────────────────────────────────
 
@@ -10,8 +10,10 @@ function makeFile(name: string, type: string, sizeBytes: number): File {
 
 function mockFileReaderSuccess(dataUri: string) {
   const mockReader = {
-    readAsDataURL: vi.fn(function(this: { onload: ((e: { target: { result: string } }) => void) | null }) {
+    result: undefined as string | undefined, // Added property
+    readAsDataURL: vi.fn(function(this: any) {
       setTimeout(() => {
+        this.result = dataUri // Added property assignment
         if (this.onload) this.onload({ target: { result: dataUri } })
       }, 0)
     }),
@@ -36,7 +38,7 @@ function mockFileReaderError() {
 // ── Tests ─────────────────────────────────────────────────────────────────────
 
 describe('fileToBase64', () => {
-  beforeEach(() => vi.restoreAllMocks())
+  beforeEach(() => { vi.restoreAllMocks() })
 
   it('converts a valid JPEG file to base64', async () => {
     mockFileReaderSuccess('data:image/jpeg;base64,abc123')

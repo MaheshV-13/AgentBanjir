@@ -77,6 +77,11 @@ export const EnrichedSignalSchema = z.object({
     .datetime({ offset: true }) // accepts both Z and +08:00 offsets
     .optional(),
 
+  updated_at: z
+    .string()
+    .datetime({ offset: true })
+    .optional(),
+
   raw_message: z.string().trim().optional(),
 })
 

@@ -54,6 +54,8 @@ export interface EnrichedSignal {
   status:              SignalStatus
   /** ISO-8601 timestamp — set by backend; used for feed sort order */
   created_at?:         string
+  /** ISO-8601 timestamp of the most recent status mutation (e.g. dispatched time) */
+  updated_at?:         string
   /** Original raw message from victim — displayed in SignalCard detail row */
   raw_message?:        string
 }

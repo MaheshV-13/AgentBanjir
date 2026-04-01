@@ -1,11 +1,11 @@
 import { describe, it, expect } from 'vitest'
 import { renderHook } from '@testing-library/react'
-import { useMapMarkers } from 'src/hooks/useMapMarkers'
-import { SignalProvider } from 'src/context/SignalContext'
-import { useSignalContext } from 'src/context/SignalContext'
+import { useMapMarkers } from '@/hooks/useMapMarkers'
+import { SignalProvider } from '@/context/SignalContext'
+import { useSignalContext } from '@/context/SignalContext'
 import { act } from '@testing-library/react'
 import type { ReactNode } from 'react'
-import type { EnrichedSignal } from 'src/types/signal.types'
+import type { EnrichedSignal } from '@/types/signal.types'
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 

@@ -1,11 +1,11 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
-import MessageTextarea  from 'src/components/form/MessageTextarea'
-import VerifiedToggle   from 'src/components/form/VerifiedToggle'
-import NeedsChipList    from 'src/components/signal/NeedsChipList'
-import ConfidenceBar    from 'src/components/signal/ConfidenceBar'
-import StatusBadge      from 'src/components/signal/StatusBadge'
-import CoordinatesTag   from 'src/components/signal/CoordinatesTag'
+import MessageTextarea  from '@/components/form/MessageTextarea'
+import VerifiedToggle   from '@/components/form/VerifiedToggle'
+import NeedsChipList    from '@/components/signal/NeedsChipList'
+import ConfidenceBar    from '@/components/signal/ConfidenceBar'
+import StatusBadge      from '@/components/signal/StatusBadge'
+import CoordinatesTag   from '@/components/signal/CoordinatesTag'
 
 // ── MessageTextarea ───────────────────────────────────────────────────────────
 

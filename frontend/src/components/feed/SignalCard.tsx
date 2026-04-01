@@ -7,6 +7,7 @@ import ConfidenceBar    from '@/components/signal/ConfidenceBar'
 import NeedsChipList    from '@/components/signal/NeedsChipList'
 import CoordinatesTag   from '@/components/signal/CoordinatesTag'
 import OperatorActions  from '@/components/signal/OperatorActions'
+import { formatRelativeTime } from '@/utils/formatRelativeTime'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SignalCard — primary display unit for one EnrichedSignal
@@ -68,18 +69,16 @@ export default function SignalCard({
         <div className="flex items-center gap-2 flex-wrap">
           <SeverityBadge severity={signal.severity_level} />
           <StatusBadge   status={signal.status} />
+          {signal.status === 'Dispatched' && signal.updated_at && (
+            <span className="text-xs text-green-300 font-mono whitespace-nowrap">
+              Dispatched {formatRelativeTime(signal.updated_at)}
+            </span>
+          )}
         </div>
         <span className="text-xs font-mono text-slate-500 shrink-0">
           #{signal.id.slice(-6).toUpperCase()}
         </span>
       </div>
-
-      {/* ── Raw message ─────────────────────────────────────────────────── */}
-      {signal.raw_message && (
-        <p className="text-sm text-slate-300 mb-3 leading-snug line-clamp-2">
-          {signal.raw_message}
-        </p>
-      )}
 
       {/* ── Confidence bar ──────────────────────────────────────────────── */}
       <div className="mb-3">

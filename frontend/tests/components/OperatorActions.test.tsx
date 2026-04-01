@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
-import OperatorActions from 'src/components/signal/OperatorActions'
-import type { EnrichedSignal } from 'src/types/signal.types'
+import OperatorActions from '@/components/signal/OperatorActions'
+import type { EnrichedSignal } from '@/types/signal.types'
 
 const SIGNAL: EnrichedSignal = {
   id:                  'sig-001',

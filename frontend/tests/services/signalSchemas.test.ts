@@ -27,7 +27,7 @@ const VALID_SIGNAL = {
 
 const VALID_INPUT = {
   gps_coordinates: { lat: 3.1478, lng: 101.7001 },
-  image_base64: 'data:image/jpeg;base64,/9j/abc123',
+  image_base64: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAP//////////////////////////////////////////////////////////////////////////////////////wgALCAABAAEBAREA/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA=',
   raw_message: 'Help needed urgently',
   simulated_user_verified: true,
 }

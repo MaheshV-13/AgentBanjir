@@ -9,7 +9,15 @@ import { useSignalContext } from '@/context/SignalContext'
 //   • Last sync timestamp
 // ─────────────────────────────────────────────────────────────────────────────
 
-export default function AppHeader() {
+type ViewMode = 'victim' | 'dispatcher'
+
+export default function AppHeader({
+  view,
+  onViewChange,
+}: {
+  view: ViewMode
+  onViewChange: (view: ViewMode) => void
+}) {
   const { state } = useSignalContext()
   const { isPolling, pollError, lastSyncedAt } = state
 
@@ -64,7 +72,12 @@ export default function AppHeader() {
         </svg>
 
         <div>
-          <h1 className="text-sm font-semibold text-slate-200 font-display leading-none">
+          <h1
+            className="
+              text-sm font-semibold font-display leading-none
+              bg-clip-text text-transparent bg-gradient-to-r from-emerald-300 to-teal-400
+            "
+          >
             AgentBanjir
           </h1>
           <p className="text-xs text-slate-600 mt-0.5 font-mono">
@@ -75,6 +88,46 @@ export default function AppHeader() {
 
       {/* ── Status indicators ───────────────────────────────────────────── */}
       <div className="flex items-center gap-4">
+        {/* ── Role toggle ──────────────────────────────────────────────── */}
+        <div
+          role="tablist"
+          aria-label="Select dashboard role"
+          className="flex sm:flex items-center gap-1 rounded-md bg-[#0d1117] border border-[#30363d] p-1"
+        >
+          <button
+            type="button"
+            role="tab"
+            aria-selected={view === 'victim'}
+            onClick={() => onViewChange('victim')}
+            className={`
+              px-2 py-1 rounded-md text-xs font-medium border transition-colors duration-150
+              focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-1
+              focus-visible:ring-offset-[#161b22]
+              ${view === 'victim'
+                ? 'border-brand text-slate-100 bg-brand/15'
+                : 'border-transparent text-slate-500 hover:text-slate-300 hover:bg-[#161b22]'}
+            `}
+          >
+            Victim
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={view === 'dispatcher'}
+            onClick={() => onViewChange('dispatcher')}
+            className={`
+              px-2 py-1 rounded-md text-xs font-medium border transition-colors duration-150
+              focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-1
+              focus-visible:ring-offset-[#161b22]
+              ${view === 'dispatcher'
+                ? 'border-brand text-slate-100 bg-brand/15'
+                : 'border-transparent text-slate-500 hover:text-slate-300 hover:bg-[#161b22]'}
+            `}
+          >
+            Dispatcher
+          </button>
+        </div>
+
         {/* Last sync */}
         <div className="hidden sm:flex items-center gap-1.5">
           <span className="text-xs text-slate-600 font-mono">Last sync:</span>
@@ -85,7 +138,12 @@ export default function AppHeader() {
         <div className="hidden sm:block h-4 w-px bg-[#30363d]" aria-hidden="true" />
 
         {/* Live / error indicator */}
-        {pollError ? (
+        {view === 'victim' ? (
+          <div className="flex items-center gap-1.5" aria-label="Victim mode">
+            <span className="inline-block w-2 h-2 rounded-full bg-amber-500" aria-hidden="true" />
+            <span className="text-xs text-amber-300 font-mono">Victim view</span>
+          </div>
+        ) : pollError ? (
           <div className="flex items-center gap-1.5">
             <span
               className="inline-block w-2 h-2 rounded-full bg-red-500"
