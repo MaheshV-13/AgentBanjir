@@ -2,8 +2,8 @@ import { Router, type Request, type Response } from "express";
 import twilio from "twilio";
 import { v4 as uuidv4 } from "uuid";
 import { extractFromGemini } from "@/ai/geminiExtractionService";
-import { logger } from "@/logger/logger";
-import { signalStore } from "@/store/signalStore";
+import { logger }            from "@/logger/logger";
+import { signalStore }       from "@/store/signalStore";
 import type { MasterInputSchemaType } from "@/schemas/masterInputSchema";
 import type { EnrichedSignal, SeverityLevel } from "@/types/signal.types";
 
@@ -23,17 +23,20 @@ twilioWebhookRouter.post("/", (req: Request, res: Response) => {
   // 2. RUN AI AND DB IN THE BACKGROUND
   (async () => {
     try {
-      // --- HACKATHON BYPASS ---
-      // Since Twilio webhooks are stateless, if the user only sends text, 
-      // we inject Penaga's coordinates so Vertex AI has a location to search against.
-      const finalLat = Latitude ? parseFloat(Latitude) : 5.5264;
-      const finalLng = Longitude ? parseFloat(Longitude) : 100.3800;
+      if (!Latitude || !Longitude) {
+        await twilioClient.messages.create({
+          body: "AgentBanjir: We received your message, but we need your coordinates. Please share your 'Location' pin via WhatsApp.",
+          from: To, // The Sandbox Number
+          to: From, // The Victim's Number
+        });
+        return;
+      }
 
       // Prepare input for AI
       const masterInput: MasterInputSchemaType = {
-        gps_coordinates: { lat: finalLat, lng: finalLng },
+        gps_coordinates: { lat: parseFloat(Latitude), lng: parseFloat(Longitude) },
         raw_message: Body || "Location pin shared",
-        image_base64: "",
+        image_base64: "", 
         simulated_user_verified: true,
       };
 
@@ -47,15 +50,13 @@ twilioWebhookRouter.post("/", (req: Request, res: Response) => {
 
       const enrichedSignal: EnrichedSignal = {
         id: signalId,
-        gps_coordinates: { lat: finalLat, lng: finalLng },
+        gps_coordinates: { lat: parseFloat(Latitude), lng: parseFloat(Longitude) },
         severity_level: severity,
         ai_confidence_score: extraction.ai_confidence_score ?? 0,
         specific_needs: extraction.specific_needs ?? [],
         status: "Pending_Human_Review",
         created_at: now,
         updated_at: now,
-        // If Gemini successfully attached the boats from Vertex, pass them to the DB
-        nearest_boats: (extraction as any).nearest_boats,
       };
 
       // Save to DB
@@ -71,7 +72,7 @@ twilioWebhookRouter.post("/", (req: Request, res: Response) => {
 
     } catch (error: any) {
       logger.error("[Webhook] Async Processing Error:", error);
-
+      
       // If the error is a Twilio Limit (Code 63038), do NOT try to send another message
       if (error.code === 63038) {
         logger.warn("[Webhook] Twilio daily limit reached. Bypassing outbound SMS. Signal was still processed internally.");
@@ -80,13 +81,13 @@ twilioWebhookRouter.post("/", (req: Request, res: Response) => {
 
       // Only attempt fallback SMS if we know we haven't hit the account limit
       try {
-        await twilioClient.messages.create({
+         await twilioClient.messages.create({
           body: "AgentBanjir: Signal received. An operator is reviewing your case manually.",
           from: To,
           to: From,
         });
       } catch (fallbackError) {
-        logger.error("[Webhook] Failed to send fallback message:", fallbackError);
+         logger.error("[Webhook] Failed to send fallback message:", fallbackError);
       }
     }
   })(); // Immediately invoke the async function
