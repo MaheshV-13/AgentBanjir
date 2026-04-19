@@ -73,6 +73,10 @@ const config: Config = {
         'severity-pulse': 'severityPulse 1.5s ease-in-out infinite',
         // Live indicator dot
         'live-dot':       'liveDot 1.2s ease-in-out infinite',
+        // High-confidence glow on ConfidenceBar (tier > 85)
+        'confidence-high-glow': 'confidenceHighGlow 1.8s ease-in-out infinite',
+        // Subtle “radar sweep” on Dispatched status badge
+        'dispatched-badge-sweep': 'dispatchedBadgeSweep 2.6s ease-in-out infinite',
         // Slide-in for new card appearing in feed
         'slide-in':       'slideIn 0.25s ease-out',
         // Collapse/expand for SubmissionForm panel
@@ -94,6 +98,15 @@ const config: Config = {
         panelOpen: {
           from: { opacity: '0', transform: 'translateY(4px)' },
           to:   { opacity: '1', transform: 'translateY(0)' },
+        },
+        confidenceHighGlow: {
+          '0%, 100%': { boxShadow: '0 0 0 rgba(20,184,166,0)' },
+          '50%':       { boxShadow: '0 0 14px rgba(20,184,166,0.35)' },
+        },
+        dispatchedBadgeSweep: {
+          '0%':   { transform: 'translateX(-120%)', opacity: '0' },
+          '20%':  { opacity: '0.7' },
+          '100%': { transform: 'translateX(120%)', opacity: '0' },
         },
       },
 

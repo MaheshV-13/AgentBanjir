@@ -112,7 +112,7 @@ analyzeSignalRouter.post(
       }
 
       // ── Step 5: Persist to In-Memory Store ─────────────────────────────────
-      signalStore.upsert(enrichedSignal);
+      await signalStore.upsert(enrichedSignal);
 
       // ── Step 6: Log Milestone + Respond ────────────────────────────────────
       logger.info("POST /api/v1/analyze-signal", {

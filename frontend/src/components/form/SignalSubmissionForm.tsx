@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { ChevronUp, ChevronDown, Send, Loader2, CheckCircle2, AlertCircle } from 'lucide-react'
 import { useSignalContext }    from '@/context/SignalContext'
 import { submitSignal }        from '@/services/signalService'
@@ -38,13 +38,18 @@ const EMPTY_FORM: FormState = {
   simulated_user_verified: false,
 }
 
-export default function SignalSubmissionForm() {
+export default function SignalSubmissionForm({
+  onSwitchToDispatcher,
+}: {
+  onSwitchToDispatcher?: () => void
+}) {
   const { dispatch } = useSignalContext()
   const [isOpen,       setIsOpen      ] = useState(false)
   const [form,         setForm        ] = useState<FormState>(EMPTY_FORM)
   const [fieldErrors,  setFieldErrors ] = useState<Partial<Record<string, string>>>({})
   const [submitStatus, setSubmitStatus] = useState<SubmitStatus>('idle')
   const [submitError,  setSubmitError ] = useState<string | null>(null)
+  const resetTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const setField = <K extends keyof FormState>(key: K, value: FormState[K]) => {
     setForm(prev => ({ ...prev, [key]: value }))
@@ -90,9 +95,11 @@ export default function SignalSubmissionForm() {
       setSubmitStatus('success')
 
       // Reset form after 3s, keep panel open for demo
-      setTimeout(() => {
+      if (resetTimeoutRef.current) clearTimeout(resetTimeoutRef.current)
+      resetTimeoutRef.current = setTimeout(() => {
         setForm(EMPTY_FORM)
         setSubmitStatus('idle')
+        resetTimeoutRef.current = null
       }, 3000)
 
     } catch (err) {
@@ -102,11 +109,20 @@ export default function SignalSubmissionForm() {
   }
 
   const handleReset = () => {
+    if (resetTimeoutRef.current) clearTimeout(resetTimeoutRef.current)
+    resetTimeoutRef.current = null
     setForm(EMPTY_FORM)
     setFieldErrors({})
     setSubmitStatus('idle')
     setSubmitError(null)
   }
+
+  useEffect(() => {
+    return () => {
+      if (resetTimeoutRef.current) clearTimeout(resetTimeoutRef.current)
+      resetTimeoutRef.current = null
+    }
+  }, [])
 
   return (
     <div className="shrink-0 bg-[#161b22] border-t border-[#30363d]">
@@ -153,9 +169,32 @@ export default function SignalSubmissionForm() {
                 className="text-green-400"
               />
               <p className="text-sm font-medium text-green-400">Signal submitted successfully</p>
+              {form.image_base64 && (
+                <img
+                  src={form.image_base64}
+                  alt="Uploaded incident photo preview"
+                  className="mt-1 w-full max-w-xs h-auto rounded-md border border-[#30363d]"
+                />
+              )}
               <p className="text-xs text-slate-600">
                 The enriched signal has been added to the feed. Resetting in 3 seconds…
               </p>
+              {onSwitchToDispatcher && (
+                <button
+                  type="button"
+                  onClick={onSwitchToDispatcher}
+                  className="
+                    mt-2 px-4 py-2 rounded-md text-xs font-medium
+                    bg-brand text-white
+                    hover:bg-brand-hover
+                    transition-colors duration-150
+                    focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand
+                    focus-visible:ring-offset-2 focus-visible:ring-offset-[#161b22]
+                  "
+                >
+                  Switch to Dispatcher view
+                </button>
+              )}
             </div>
           ) : (
             <form onSubmit={handleSubmit} noValidate>

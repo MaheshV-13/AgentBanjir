@@ -1,11 +1,11 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import axios from 'axios'
-import { fetchSignals, submitSignal, updateSignalStatus, extractErrorMessage, isNetworkError } from 'src/services/signalService'
-import apiClient from 'src/services/apiClient'
+import { fetchSignals, submitSignal, updateSignalStatus, extractErrorMessage, isNetworkError } from '@/services/signalService'
+import apiClient from '@/services/apiClient'
 
 // ── Mock axios ────────────────────────────────────────────────────────────────
 
-vi.mock('../src/services/apiClient', () => ({
+vi.mock('@/services/apiClient', () => ({
   default: {
     get:   vi.fn(),
     post:  vi.fn(),

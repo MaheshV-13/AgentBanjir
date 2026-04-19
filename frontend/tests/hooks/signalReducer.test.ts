@@ -5,8 +5,8 @@ import {
   sortSignals,
   applyFilter,
   type SignalState,
-} from 'src/context/signalReducer'
-import type { EnrichedSignal } from 'src/types/signal.types'
+} from '@/context/signalReducer'
+import type { EnrichedSignal } from '@/types/signal.types'
 
 // ── Fixtures ──────────────────────────────────────────────────────────────────
 

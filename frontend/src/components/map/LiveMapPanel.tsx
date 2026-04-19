@@ -31,7 +31,7 @@ const DEFAULT_ZOOM = Number(import.meta.env.VITE_MAP_DEFAULT_ZOOM) || 6
 
 function MapController() {
   const map                  = useMap()
-  const { markers, bounds, hasActiveHighAlert } = useMapMarkers()
+  const { markers, bounds } = useMapMarkers()
   const { state }            = useSignalContext()
   const prevCountRef         = useRef(0)
   const hasFitBoundsRef      = useRef(false)

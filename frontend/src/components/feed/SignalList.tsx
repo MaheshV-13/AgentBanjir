@@ -11,7 +11,7 @@ import SignalCard from './SignalCard'
 // ─────────────────────────────────────────────────────────────────────────────
 
 export default function SignalList() {
-  const { state, dispatch }     = useSignalContext()
+  const { state }     = useSignalContext()
   const { filteredSignals, selectedSignalId } = state
   const { confirmDispatch, rejectSignal, isUpdating, actionError, clearError } =
     useOperatorActions()

@@ -42,6 +42,14 @@ export const SignalStatusSchema = z.enum([
 
 export const FilterOptionSchema = z.enum(['All', 'High', 'Pending', 'Dispatched'])
 
+export const NearestBoatSchema = z.object({
+  boat_id: z.string(),
+  name: z.string(),
+  distance_km: z.number(),
+  capacity: z.number(),
+  current_status: z.enum(['Available', 'Deployed', 'Maintenance']),
+})
+
 // ── Enriched Signal (GET /api/v1/signals array items) ────────────────────────
 
 /**
@@ -77,7 +85,13 @@ export const EnrichedSignalSchema = z.object({
     .datetime({ offset: true }) // accepts both Z and +08:00 offsets
     .optional(),
 
+  updated_at: z
+    .string()
+    .datetime({ offset: true })
+    .optional(),
+
   raw_message: z.string().trim().optional(),
+  nearest_boats: z.array(NearestBoatSchema).optional(),
 })
 
 export type EnrichedSignalZ = z.infer<typeof EnrichedSignalSchema>

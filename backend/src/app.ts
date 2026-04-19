@@ -25,6 +25,7 @@ import { healthRouter }         from "@/routes/health.route";
 import { signalsRouter }        from "@/routes/signals.route";
 import { analyzeSignalRouter }  from "@/routes/analyzeSignal.route";
 import { signalStatusRouter }   from "@/routes/signalStatus.route";
+import { twilioWebhookRouter }  from "@/routes/twilioWebhook.route";
 
 import { logger } from "@/logger/logger";
 
@@ -71,6 +72,7 @@ export function createApp(): Application {
   app.use("/api/v1/analyze-signal", analyzeSignalRouter);
   app.use("/api/v1/signals",        signalsRouter);
   app.use("/api/v1/signals",        signalStatusRouter);
+  app.use("/api/v1/webhook/twilio", twilioWebhookRouter);
 
   // ── 8. 404 Catch-All ────────────────────────────────────────────────────────
   // Must come AFTER all route registrations. Returns a normalised error envelope
