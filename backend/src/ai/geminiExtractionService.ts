@@ -20,12 +20,13 @@
  *   - Null fields from Gemini are handled with logged defaults in SignalOrchestrator.
  */
 
-import { z }      from "zod";
+import { z } from "zod";
 import { logger } from "@/logger/logger";
-import { ai }     from "@/orchestrator/genkit.config";
+import { ai } from "@/orchestrator/genkit.config";
+import { retrieveBoatsTool } from "@/ai/tools/retrieveBoatsTool";
 
 import { SYSTEM_PROMPT, SYSTEM_PROMPT_VERSION } from "@/ai/prompts/systemPrompt";
-import type { MasterInputSchemaType }           from "@/schemas/masterInputSchema";
+import type { MasterInputSchemaType } from "@/schemas/masterInputSchema";
 
 // ─── Internal Extraction Schema ───────────────────────────────────────────────
 // Scoped to this module — not exported. The gateway only ever sees the merged
@@ -46,6 +47,12 @@ const GeminiExtractionSchema = z.object({
 
   /** Self-reported confidence integer 0–100; minimum floor 10 per prompt contract. */
   ai_confidence_score: z.number().int().min(0).max(100).nullable(),
+
+  /** 
+   * The array of boats returned by the Vertex AI tool. 
+   */
+  nearest_boats: z.array(z.any()).nullable().optional()
+    .describe("You MUST call the retrieveNearestRescueBoats tool to populate this array if the user needs a boat or evacuation."),
 });
 
 export type GeminiExtraction = z.infer<typeof GeminiExtractionSchema>;
@@ -77,7 +84,7 @@ function buildPromptParts(input: MasterInputSchemaType): GenkitPromptPart[] {
     const rawBase64 = image_base64.replace(/^data:image\/\w+;base64,/, "");
     parts.push({
       media: {
-        url:         `data:image/jpeg;base64,${rawBase64}`,
+        url: `data:image/jpeg;base64,${rawBase64}`,
         contentType: "image/jpeg",
       },
     });
@@ -87,6 +94,12 @@ function buildPromptParts(input: MasterInputSchemaType): GenkitPromptPart[] {
     text: [
       `GPS Location: lat=${gps_coordinates.lat}, lng=${gps_coordinates.lng}`,
       `Distress Message: "${raw_message}"`,
+      "",
+      "--- CRITICAL AGENT INSTRUCTION ---",
+      "If the distress message requests a boat, mentions evacuation, or implies rising water:",
+      "1. You MUST call the 'retrieveNearestRescueBoats' tool BEFORE generating your final JSON response.",
+      "2. You must place the exact data returned by that tool into the 'nearest_boats' field of your JSON output.",
+      "----------------------------------",
       "",
       "Extract the crisis data from the message and image above.",
       "Return ONLY the JSON object — no markdown, no prose.",
@@ -114,24 +127,25 @@ export async function extractFromGemini(
   input: MasterInputSchemaType
 ): Promise<GeminiExtraction> {
   const promptParts = buildPromptParts(input);
-  const hasImage   = input.image_base64.length > 0;
+  const hasImage = input.image_base64.length > 0;
 
   logger.debug("[GeminiExtractionService] Calling Gemini", {
     prompt_version: SYSTEM_PROMPT_VERSION,
-    has_image:      hasImage,
+    has_image: hasImage,
     message_length: input.raw_message.length,
   });
 
   const response = await ai.generate({
-    model:  "googleai/gemini-2.5-flash",
+    model: "googleai/gemini-2.5-flash",
     system: SYSTEM_PROMPT,
     prompt: promptParts,
+    tools: [retrieveBoatsTool],
     output: {
       format: "json",
       schema: GeminiExtractionSchema,
     },
     config: {
-      temperature:     0.1, // Low temperature → deterministic extraction
+      temperature: 0.1, // Low temperature → deterministic extraction
     },
   });
 
@@ -145,10 +159,10 @@ export async function extractFromGemini(
   }
 
   logger.debug("[GeminiExtractionService] Extraction complete", {
-    location:            response.output.location,
-    severity_level:      response.output.severity_level,
+    location: response.output.location,
+    severity_level: response.output.severity_level,
     ai_confidence_score: response.output.ai_confidence_score,
-    needs_count:         response.output.specific_needs?.length ?? 0,
+    needs_count: response.output.specific_needs?.length ?? 0,
   });
 
   return response.output;

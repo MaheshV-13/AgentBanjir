@@ -16,7 +16,7 @@
  * Monotonically incremented on every prompt semantic change.
  * Logged with each Gemini call for regression tracing.
  */
-export const SYSTEM_PROMPT_VERSION = "v1.0.0" as const;
+export const SYSTEM_PROMPT_VERSION = "v1.1.0" as const;
 
 /**
  * Full system prompt injected as Genkit's `system` parameter on every
@@ -76,6 +76,7 @@ Produce an ai_confidence_score (integer 0–100) reflecting evidence quality:
 - Minimum floor: 10. Never return 0 unless the signal is completely unreadable.
 
 ---
+---
 ## OUTPUT CONTRACT
 
 Respond with ONLY a valid JSON object. No markdown, no prose, no extra fields.
@@ -84,7 +85,8 @@ Respond with ONLY a valid JSON object. No markdown, no prose, no extra fields.
   "location": "string | null",
   "severity_level": "Low" | "Medium" | "High" | null,
   "specific_needs": ["string", ...] | null,
-  "ai_confidence_score": integer (0–100)
+  "ai_confidence_score": integer (0–100),
+  "nearest_boats": ["object"] | null
 }
 
 Field rules:
@@ -97,6 +99,7 @@ Field rules:
   Return [] (empty array) if no specific needs mentioned. Return null only if
   the message is too corrupted to parse at all.
 - ai_confidence_score: Always return an integer. Minimum 10.
+- nearest_boats: The exact JSON array returned by the rescue boat tool. Return null if no boats are needed or found.
 
 ---
 ## FALLBACK RULE
