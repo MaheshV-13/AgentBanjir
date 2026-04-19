@@ -10,19 +10,38 @@ interface ConfidenceBarProps {
   score: number
 }
 
-function getBarColour(score: number): string {
-  if (score >= 75) return 'bg-green-500'
-  if (score >= 50) return 'bg-amber-500'
-  return 'bg-red-500'
+type ConfidenceTier = 'high' | 'medium' | 'low'
+
+function getTier(score: number): ConfidenceTier {
+  if (score > 85) return 'high'
+  if (score >= 50) return 'medium'
+  return 'low'
+}
+
+function getTierGradientClasses(tier: ConfidenceTier): string {
+  switch (tier) {
+    case 'high':
+      return 'bg-gradient-to-r from-emerald-400 to-teal-500'
+    case 'medium':
+      return 'bg-gradient-to-r from-amber-400 to-amber-500'
+    default:
+      return 'bg-gradient-to-r from-rose-400 to-red-500'
+  }
+}
+
+function getTierTextGradientClasses(tier: ConfidenceTier): string {
+  return `bg-clip-text text-transparent ${getTierGradientClasses(tier)}`
 }
 
 export default function ConfidenceBar({ score }: ConfidenceBarProps) {
   const clamped = Math.max(0, Math.min(100, score))
-  const colour  = getBarColour(clamped)
+  const tier     = getTier(clamped)
+  const barBg    = getTierGradientClasses(tier)
+  const textGrad = getTierTextGradientClasses(tier)
 
   return (
     <div className="flex items-center gap-2">
-      <span className="text-xs text-slate-500 font-mono w-16 shrink-0">
+      <span className={`text-xs font-mono w-16 shrink-0 ${textGrad}`}>
         AI confidence
       </span>
       <div
@@ -34,11 +53,11 @@ export default function ConfidenceBar({ score }: ConfidenceBarProps) {
         aria-label={`AI confidence score: ${clamped}%`}
       >
         <div
-          className={`h-full rounded-full transition-all duration-500 ${colour}`}
+          className={`h-full rounded-full transition-all duration-500 ${barBg} ${tier === 'high' ? 'animate-confidence-high-glow' : ''}`}
           style={{ width: `${clamped}%` }}
         />
       </div>
-      <span className="text-xs font-mono text-slate-400 w-8 text-right shrink-0">
+      <span className={`text-xs font-mono w-8 text-right shrink-0 ${textGrad}`}>
         {clamped}%
       </span>
     </div>

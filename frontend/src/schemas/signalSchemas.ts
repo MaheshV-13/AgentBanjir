@@ -42,6 +42,14 @@ export const SignalStatusSchema = z.enum([
 
 export const FilterOptionSchema = z.enum(['All', 'High', 'Pending', 'Dispatched'])
 
+export const NearestBoatSchema = z.object({
+  boat_id: z.string(),
+  name: z.string(),
+  distance_km: z.number(),
+  capacity: z.number(),
+  current_status: z.enum(['Available', 'Deployed', 'Maintenance']),
+})
+
 // ── Enriched Signal (GET /api/v1/signals array items) ────────────────────────
 
 /**
@@ -77,7 +85,13 @@ export const EnrichedSignalSchema = z.object({
     .datetime({ offset: true }) // accepts both Z and +08:00 offsets
     .optional(),
 
+  updated_at: z
+    .string()
+    .datetime({ offset: true })
+    .optional(),
+
   raw_message: z.string().trim().optional(),
+  nearest_boats: z.array(NearestBoatSchema).optional(),
 })
 
 export type EnrichedSignalZ = z.infer<typeof EnrichedSignalSchema>
@@ -127,16 +141,14 @@ export const MasterInputSignalSchema = z.object({
 
   image_base64: z
     .string()
-    .refine(
-      (v) => v === '' || v.startsWith('data:image/'),
-      'image_base64 must be a valid data-URI or empty string',
-    )
+    // Remove the data-URI check. Just ensure it has enough characters to be valid base64 if not empty.
+    .refine((v) => v === '' || v.length >= 100, 'Invalid base64 image data')
     .default(''),
 
   raw_message: z
     .string()
     .trim()
-    .min(1, 'Message cannot be empty')
+    .min(3, 'Message must be at least 3 characters') // <-- Changed from 1 to 3
     .max(500, 'Message must be 500 characters or fewer'),
 
   simulated_user_verified: z.boolean().default(false),

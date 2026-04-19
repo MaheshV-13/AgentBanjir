@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { render, screen } from '@testing-library/react'
-import SeverityBadge from 'src/components/signal/SeverityBadge'
+import SeverityBadge from '@/components/signal/SeverityBadge'
 
 describe('SeverityBadge', () => {
   it('renders High with correct aria-label', () => {

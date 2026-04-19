@@ -32,11 +32,11 @@ const VALID_SEVERITY_VALUES: SeverityLevel[] = ["High", "Medium", "Low"];
  * @query   severity {string} Optional filter: "High" | "Medium" | "Low"
  * @access  Public (no auth — hackathon scope; login-free per clarification #7)
  */
-signalsRouter.get("/", (
+signalsRouter.get("/", async (
   req: Request,
   res: Response,
   next: NextFunction
-): void => {
+): Promise<void> => {
   try {
     const severityFilter = req.query["severity"] as string | undefined;
 
@@ -56,7 +56,7 @@ signalsRouter.get("/", (
       return;
     }
 
-    let signals = signalStore.getAll();
+    let signals = await signalStore.getAll();
 
     // Apply optional severity filter before sorting.
     if (severityFilter) {

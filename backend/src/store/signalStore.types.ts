@@ -58,64 +58,25 @@ export interface StoreHealthSnapshot {
 
 // ─── Store Interface Contract ─────────────────────────────────────────────────
 
-/**
- * Interface contract for the signal persistence layer.
- *
- * The in-memory Map implementation (signalStore.ts) satisfies this interface
- * for hackathon scope. A production Firestore adapter must also satisfy it —
- * route handlers depend on this interface, not on the concrete class, so the
- * swap is a single-line change in signalStore.ts.
- *
- * Signature decisions:
- *  - upsert() returns void: callers don't need the write result; adding
- *    StoreWriteResult as a return type is a future logging concern.
- *  - count() and clear() are on the interface: tests use both extensively,
- *    and a Firestore adapter can implement them via COUNT queries / batch delete.
- *  - getHealthSnapshot() enables the /health endpoint to report store metrics
- *    without exposing the internal Map to route handlers.
- */
 export interface ISignalStore {
-  /**
-   * Returns all stored signals as an array.
-   * Ordering is not guaranteed — sorting is the caller's responsibility.
-   */
-  getAll(): EnrichedSignal[];
+  /** Returns all stored signals as an array. */
+  getAll(): Promise<EnrichedSignal[]>;
 
-  /**
-   * Returns a single signal by its UUID, or undefined if not found.
-   * @param id - UUID assigned by the gateway on creation.
-   */
-  getById(id: string): EnrichedSignal | undefined;
+  /** Returns a single signal by its UUID, or undefined if not found. */
+  getById(id: string): Promise<EnrichedSignal | undefined>;
 
-  /**
-   * Inserts a new signal or replaces an existing one with the same id.
-   * @param signal - Fully enriched signal to persist.
-   */
-  upsert(signal: EnrichedSignal): void;
+  /** Inserts a new signal or replaces an existing one with the same id. */
+  upsert(signal: EnrichedSignal): Promise<void>;
 
-  /**
-   * Mutates the status of an existing signal and updates updated_at.
-   * @param id     - UUID of the target signal.
-   * @param status - New status value.
-   * @returns The updated signal, or undefined if the id was not found.
-   */
-  updateStatus(id: string, status: SignalStatus): EnrichedSignal | undefined;
+  /** Mutates the status of an existing signal and updates updated_at. */
+  updateStatus(id: string, status: SignalStatus): Promise<EnrichedSignal | undefined>;
 
-  /**
-   * Returns the number of signals currently in the store.
-   * Used in tests to assert store state without calling getAll().
-   */
-  count(): number;
+  /** Returns the number of signals currently in the store. */
+  count(): Promise<number>;
 
-  /**
-   * Removes all signals from the store.
-   * Intended for test teardown only — not exposed via any HTTP endpoint.
-   */
-  clear(): void;
+  /** Removes all signals from the store. */
+  clear(): Promise<void>;
 
-  /**
-   * Returns a point-in-time snapshot of store metrics.
-   * Consumed by the /health endpoint and future monitoring integrations.
-   */
-  getHealthSnapshot(): StoreHealthSnapshot;
+  /** Returns a point-in-time snapshot of store metrics. */
+  getHealthSnapshot(): Promise<StoreHealthSnapshot>;
 }

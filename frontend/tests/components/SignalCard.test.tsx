@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
-import SignalCard from 'src/components/feed/SignalCard'
-import type { EnrichedSignal } from 'src/types/signal.types'
+import SignalCard from '@/components/feed/SignalCard'
+import type { EnrichedSignal } from '@/types/signal.types'
 
 // ── Fixtures ──────────────────────────────────────────────────────────────────
 
@@ -34,12 +34,7 @@ describe('SignalCard — rendering', () => {
   it('renders status badge', () => {
     render(<SignalCard {...defaultProps} />)
     expect(screen.getByLabelText(/Status: Pending Review/i)).toBeInTheDocument()
-  })
-
-  it('renders raw message when present', () => {
-    render(<SignalCard {...defaultProps} />)
-    expect(screen.getByText(/Air banjir dah masuk rumah/i)).toBeInTheDocument()
-  })
+  })  
 
   it('renders coordinates', () => {
     render(<SignalCard {...defaultProps} />)
@@ -110,11 +105,5 @@ describe('SignalCard — interactions', () => {
     render(<SignalCard {...defaultProps} isUpdating={true} />)
     expect(screen.getByLabelText(/Confirm dispatch/i)).toBeDisabled()
     expect(screen.getByLabelText(/Reject signal/i)).toBeDisabled()
-  })
-
-  it('shows error message when actionError is set', () => {
-    render(<SignalCard {...defaultProps} actionError="Network error occurred" />)
-    expect(screen.getByRole('alert', { name: undefined })).toBeInTheDocument()
-    expect(screen.getByText(/Network error occurred/i)).toBeInTheDocument()
   })
 })

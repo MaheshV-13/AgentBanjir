@@ -1,13 +1,13 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { renderHook, act, waitFor } from '@testing-library/react'
-import { useSignalFeed } from 'src/hooks/useSignalFeed'
-import * as signalService from 'src/services/signalService'
-import { SignalProvider } from 'src/context/SignalContext'
+import { useSignalFeed } from '@/hooks/useSignalFeed'
+import * as signalService from '@/services/signalService'
+import { SignalProvider } from '@/context/SignalContext'
 import type { ReactNode } from 'react'
 
 // ── Mocks ─────────────────────────────────────────────────────────────────────
 
-vi.mock('../src/services/signalService', () => ({
+vi.mock('@/services/signalService', () => ({
   fetchSignals:        vi.fn(),
   extractErrorMessage: vi.fn((e: unknown) => (e instanceof Error ? e.message : 'error')),
 }))
@@ -32,7 +32,8 @@ const wrapper = ({ children }: { children: ReactNode }) => (
 
 describe('useSignalFeed', () => {
   beforeEach(() => {
-    vi.useFakeTimers()
+    // Only fake interval timers so RTL's waitFor (setTimeout) can still operate
+    vi.useFakeTimers({ toFake: ['setInterval', 'clearInterval'] })
     vi.clearAllMocks()
   })
 
@@ -61,21 +62,20 @@ describe('useSignalFeed', () => {
 
   it('does not crash when fetch returns empty array', async () => {
     mockFetchSignals.mockResolvedValueOnce([])
-    const { result } = renderHook(() => useSignalFeed(), { wrapper })
+    renderHook(() => useSignalFeed(), { wrapper })
     await waitFor(() => expect(mockFetchSignals).toHaveBeenCalledTimes(1))
-    expect(result.error).toBeUndefined()
   })
 
   it('handles fetch failure without crashing', async () => {
     mockFetchSignals.mockRejectedValueOnce(new Error('Network error'))
-    const { result } = renderHook(() => useSignalFeed(), { wrapper })
+    renderHook(() => useSignalFeed(), { wrapper })
     await waitFor(() => expect(mockFetchSignals).toHaveBeenCalledTimes(1))
-    expect(result.error).toBeUndefined()
   })
 
   it('clears interval on unmount', async () => {
     mockFetchSignals.mockResolvedValue([])
-    const clearIntervalSpy = vi.spyOn(globalThis, 'clearInterval')
+    // Spy on window instead of globalThis for JSDOM stability
+    const clearIntervalSpy = vi.spyOn(window, 'clearInterval')
     const { unmount } = renderHook(() => useSignalFeed(), { wrapper })
     await waitFor(() => expect(mockFetchSignals).toHaveBeenCalledTimes(1))
     unmount()

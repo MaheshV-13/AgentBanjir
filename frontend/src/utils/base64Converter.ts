@@ -6,7 +6,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 export type Base64Result =
-  | { success: true;  dataUri: string; sizeKb: number }
+  | { success: true;  dataUri: string; base64Data: string; sizeKb: number }
   | { success: false; error: string }
 
 const MAX_SIZE_MB   = 5
@@ -38,9 +38,13 @@ export async function fileToBase64(file: File): Promise<Base64Result> {
 
     reader.onload = () => {
       const dataUri = reader.result as string
+      // Split off the prefix for the API payload
+      const base64Data = dataUri.split(',')[1] || '' 
+      
       resolve({
         success: true,
         dataUri,
+        base64Data, // <-- Make sure your API call uses THIS property
         sizeKb: Math.round(file.size / 1024),
       })
     }
