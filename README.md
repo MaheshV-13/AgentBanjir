@@ -13,7 +13,7 @@
 
 <div align="center">
 
-🌐 **[Live Dashboard → agentbanjir-frontend-993781728207.asia-southeast1.run.app](https://agentbanjir-frontend-993781728207.asia-southeast1.run.app/)**
+🌐 **[Live Link → agentbanjir-frontend-993781728207.asia-southeast1.run.app](https://agentbanjir-frontend-993781728207.asia-southeast1.run.app/)**
 
 </div>
 
