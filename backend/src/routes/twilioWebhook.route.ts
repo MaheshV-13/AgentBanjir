@@ -1,7 +1,8 @@
 import { Router, type Request, type Response } from "express";
 import twilio from "twilio";
 import { v4 as uuidv4 } from "uuid";
-import { extractFromGemini } from "@/ai/geminiExtractionService";
+import { SignalOrchestrator } from "@/ai/signalOrchestrator";
+import { runFloodCrisisOrchestration } from "@/orchestrator/flows/floodCrisisOrchestrationFlow";
 import { logger } from "@/logger/logger";
 import { signalStore } from "@/store/signalStore";
 import type { MasterInputSchemaType } from "@/schemas/masterInputSchema";
@@ -37,30 +38,48 @@ twilioWebhookRouter.post("/", (req: Request, res: Response) => {
         simulated_user_verified: true,
       };
 
-      // Extract data using Genkit
-      const extraction = await extractFromGemini(masterInput);
+      // 1. USE ORCHESTRATOR FOR EXTRACTION + RAG
+      const orchestrator = new SignalOrchestrator();
+      const member1Result = await orchestrator.processSignal(masterInput);
 
-      // Construct the EnrichedSignal
+      // Construct the base EnrichedSignal
       const signalId = `wa-${uuidv4()}`;
       const now = new Date().toISOString();
-      const severity = (extraction.severity_level as SeverityLevel) || "High";
+      const severity = (member1Result.severity_level as SeverityLevel) || "High";
 
-      const enrichedSignal: EnrichedSignal = {
+      let enrichedSignal: EnrichedSignal = {
         id: signalId,
-        gps_coordinates: { lat: finalLat, lng: finalLng },
+        gps_coordinates: masterInput.gps_coordinates,
         severity_level: severity,
-        ai_confidence_score: extraction.ai_confidence_score ?? 0,
-        specific_needs: extraction.specific_needs ?? [],
-        status: "Pending_Human_Review",
+        ai_confidence_score: member1Result.ai_confidence_score ?? 0,
+        specific_needs: member1Result.specific_needs ?? [],
+        nearest_boats: member1Result.nearest_boats,
+        status: "Pending_Human_Review", // Starting status
         created_at: now,
         updated_at: now,
-        // If Gemini successfully attached the boats from Vertex, pass them to the DB
-        nearest_boats: (extraction as any).nearest_boats,
       };
+
+      // 2. RUN AUTONOMOUS DISPATCH FLOW (Member 2 logic)
+      try {
+        const flowResult = await runFloodCrisisOrchestration(enrichedSignal);
+
+        // Merge the autonomous decisions back into our signal
+        enrichedSignal = {
+          ...enrichedSignal,
+          status: flowResult.recommended_status,
+          flow_result: flowResult,
+          updated_at: new Date().toISOString(),
+        };
+      } catch (flowError) {
+        logger.warn("[Webhook] Orchestration flow failed — degrading gracefully", {
+          signalId,
+          error: flowError instanceof Error ? flowError.message : String(flowError)
+        });
+      }
 
       // Save to DB
       await signalStore.upsert(enrichedSignal);
-      logger.info("[Webhook] Signal persisted to database", { signalId });
+      logger.info("[Webhook] Signal persisted to database via agentic orchestration", { signalId, status: enrichedSignal.status });
 
       // 3. SEND THE AI REPLY VIA REST API
       await twilioClient.messages.create({
