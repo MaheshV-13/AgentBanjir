@@ -62,6 +62,9 @@ gcloud run deploy "${SERVICE_NAME}" \
   --set-env-vars="DATABASE_URL=${PROD_DB_URL}" \
   --set-env-vars="VERTEX_DATA_STORE_ID=${PROD_DATA_STORE}" \
   --set-env-vars="VITE_FRONTEND_ORIGIN=${PROD_FRONTEND}" \
+  --set-env-vars="TWILIO_ACCOUNT_SID=${TWILIO_ACCOUNT_SID}" \
+  --set-env-vars="TWILIO_AUTH_TOKEN=${TWILIO_AUTH_TOKEN}" \
+  --set-env-vars="TWILIO_PHONE_NUMBER=${TWILIO_PHONE_NUMBER}" \
   --memory="${MEMORY}" \
   --cpu="${CPU}" \
   --timeout="${TIMEOUT}" \
