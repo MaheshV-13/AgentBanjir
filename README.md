@@ -11,6 +11,16 @@
 > **A resilient, end-to-end autonomous flood crisis management system that bridges the gap between chaotic raw distress signals (WhatsApp/SMS) and structured emergency response.**
 > This system models rapid "Distress-to-Dispatch" loops, handling chaotic multimodal inputs (WhatsApp/SMS/Images) using a dual-agent orchestrator—culminating in a live, interactive Command Center dashboard backed by high-integrity Google Cloud infrastructure.
 
+## 📺 Watch the 2-Minute Video Demo
+
+[Insert YouTube Link Here]
+
+### 🚨 The Problem: Crisis Data Chaos
+During rapid flooding events, emergency dispatchers are overwhelmed by a deluge of fragmented text messages, unverified images, and incomplete location pins. Traditional response lines become bottlenecks, where critical data is lost in the noise, delaying life-saving interventions.
+
+### ✅ The Solution: Autonomous Order from Chaos
+**AgentBanjir** instantly transforms chaotic raw inputs into a structured, unified emergency state. By leveraging a dual-agent orchestrator, the system autonomously extracts intelligence, grounds it against real-time rescue assets, and executes dispatch decisions in seconds—bridging the gap between a victim's distress and a rescuer's arrival.
+
 <div align="center">
 
 🌐 **[Live Link → agentbanjir-frontend-993781728207.asia-southeast1.run.app](https://agentbanjir-frontend-993781728207.asia-southeast1.run.app/)**
@@ -22,10 +32,10 @@
 ## 🛠️ Tech Stack
 
 - **Core:** TypeScript, Node.js, Express, Prisma
-- **AI & Orchestration:** Gemini 2.0 Flash, Genkit, Vertex AI Search (RAG Grounding)
+- **AI & Orchestration:** Gemini 2.5 Flash, Genkit, Vertex AI Search (RAG Grounding)
 - **Frontend & Visualisation:** React, Vite, Leaflet.js, Tailwind CSS
 - **Infrastructure:** Google Cloud Run, Cloud Build, Artifact Registry, Docker, Supabase (PostgreSQL)
-- **Concepts:** Multimodal Extraction, Agentic Orchestration, Deterministic RAG, Stateless WhatsApp Ingress, Geospatial Triage
+- **Concepts:** Multimodal Extraction, Agentic Orchestration, **Deterministic RAG**, **Stateless WhatsApp Ingress**, Geospatial Triage
 
 ---
 
@@ -33,11 +43,15 @@
 
 **Dual-Phase Agentic Orchestration:** Built a two-stage intelligence engine—Member 1 handles multimodal data extraction (Gemini) and specialized rescue asset grounding (Vertex RAG); Member 2 handles autonomous decision-making (Genkit). This strict stage separation ensures the system can extract intelligence and discover responders independently of the final dispatch logic.
 
-**Deterministic RAG Grounding:** Implemented a "forced-search" grounding mechanism within the `SignalOrchestrator`. Unlike naive AI that only calls tools when it "feels" like it, AgentBanjir executes a manual Vertex AI Search query after every extraction. This ensures map pins and responder lists are consistently populated even if the LLM's tool-calling logic is bypassed.
+**Deterministic RAG Grounding:** Implemented a **"forced-search" grounding mechanism** within the `SignalOrchestrator`. Unlike naive AI that only calls tools when it "feels" like it, AgentBanjir executes a manual Vertex AI Search query after every extraction. This ensures map pins and responder lists are consistently populated even if the LLM's tool-calling logic is bypassed.
 
-**Stateless WhatsApp Ingress:** Engineered a high-integrity Twilio webhook with a 15-second async acknowledge bypass. By decoupling the `200 OK` response from the heavy AI processing, the system prevents upstream timeouts while maintaining a resilient background pipeline for Supabase persistence and autonomous dispatching.
+![AgentBanjir Command Center Dashboard](docs/assets/dashboard-placeholder.png)
 
-**Resilient Resource Allocation:** Optimized for scalable GenAI workloads on Google Cloud Run with 2GiB RAM and a 300s timeout. This prevents Out-Of-Memory (OOM) kills during multimodal image analysis and ensures complex RAG queries finish within the request window, providing a stable backbone for emergency services.
+**Stateless WhatsApp Ingress:** Engineered a **high-integrity Twilio webhook** with a 15-second async acknowledge bypass. By decoupling the `200 OK` response from the heavy AI processing, the system prevents upstream timeouts while maintaining a resilient background pipeline for Supabase persistence and autonomous dispatching.
+
+![WhatsApp Distress-to-Dispatch Flow](docs/assets/whatsapp-demo-placeholder.jpeg)
+
+**Resilient Resource Allocation:** Optimized for **scalable GenAI workloads** on Google Cloud Run with 2GiB RAM and a 300s timeout. This prevents Out-Of-Memory (OOM) kills during multimodal image analysis and ensures complex RAG queries finish within the request window, providing a stable backbone for emergency services.
 
 **Live Tactical Command Center:** A real-time React dashboard with an interactive Leaflet map and historical signal feed. The dashboard polls the Supabase API to visualize AI-enriched metadata, confidence scores, and recommended rescue assets, enabling human operators to oversee autonomous actions in a high-stakes "Command Center" aesthetic.
 
@@ -47,7 +61,7 @@
 
 **Bypass is a Requirement, Not a Feature:** In emergency webhooks (Twilio/WhatsApp), logic must be async by default. Trying to process an LLM chain inside the request handler guarantees 504 Gateway Timeouts. Instant acknowledgement followed by background processing is the only way to build a reliable ingress.
 
-**Grounding is More Reliable Than Tool-Calling:** Relying on an LLM's tool-calling intent is probabilistic. For critical systems like emergency boat dispatch, the grounding step (Vertex AI Search) should be a deterministic part of the orchestration code. Force the lookup; don't ask the LLM for permission to search.
+**Grounding is More Reliable Than Tool-Calling:** Relying on an LLM's tool-calling intent is probabilistic. For critical systems like emergency boat dispatch, the grounding step (Vertex AI Search) should be a **deterministic part of the orchestration code**. Force the lookup; don't ask the LLM for permission to search.
 
 **Resource Tuning for LLM SDKs:** Genkit and the Vertex AI SDK are resource-intensive. Running them on standard 512MiB containers leads to unstable restarts. Tuning compute to 2GiB RAM isn't just for performance; it's a stability constraint for high-integrity agentic environments.
 
@@ -75,6 +89,17 @@
 git clone https://github.com/MaheshV-13/agentbanjir-hackathon
 cd agentbanjir-hackathon
 ```
+
+### 1.5. Environment Configuration
+Before running the application, you must configure your environment variables:
+1.  Copy the example environment file:
+    ```bash
+    cp backend/.env.example backend/.env
+    ```
+2.  Populate `backend/.env` with the following:
+    - `GEMINI_API_KEY`: Your Google AI Studio key.
+    - `DATABASE_URL`: Your Supabase connection string (**must use port 6543** for connection pooling).
+    - `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, and `TWILIO_PHONE_NUMBER`.
 
 ### 2. Install Dependencies
 
@@ -128,13 +153,7 @@ agentbanjir-hackathon/
 
 ## 📊 Results Summary
 
-| Metric | Accuracy / Reliability |
-|---|---|
-| **AI Extraction Accuracy ★** | **94.2%** |
-| **RAG Grounding Precision** | **98.0%** |
-| **Dispatch Logic Integrity** | **91.5%** |
-
-| Signal Segment | Status | typical Action |
+| Signal Segment | Status | Typical Action |
 |---|---|---|
 | **Priority Alpha** | **Dispatched** | **Immediate Rescuer SMS** |
 | Priority Beta | Pending Review | Manual HQ Audit Required |
