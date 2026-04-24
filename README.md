@@ -17,6 +17,8 @@
 
 📷 **[Video Demo Link → https://youtu.be/iz3ftYpZta8](https://youtu.be/iz3ftYpZta8)**
 
+</div>
+
 > ⚠️ **Note for Judges (Evaluation Guide):**
 > To test the live capabilities of AgentBanjir, please use the **Mock Submission Form** directly on the Web Dashboard. 
 > *The WhatsApp/Twilio integration demonstrated in our video uses a Twilio Sandbox Trial account, which strictly limits outbound SMS replies to verified developer phone numbers. The end-to-end Twilio ingress is fully functional, but third-party phone numbers will not receive the automated SMS reply.*
