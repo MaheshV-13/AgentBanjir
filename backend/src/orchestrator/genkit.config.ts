@@ -24,7 +24,7 @@ export const ai = genkit({
   // Default model for any ad-hoc generation steps.
   // floodCrisisOrchestrationFlow uses deterministic routing — Gemini is NOT
   // called during normal flow execution. This is declared for completeness.
-  model: "googleai/gemini-2.0-flash",
+  model: "googleai/gemini-2.5-flash",
 });
 
 logger.info("[genkit.config] Genkit initialised with Google AI plugin.");

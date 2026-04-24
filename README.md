@@ -11,9 +11,13 @@
 > **A resilient, end-to-end autonomous flood crisis management system that bridges the gap between chaotic raw distress signals (WhatsApp/SMS) and structured emergency response.**
 > This system models rapid "Distress-to-Dispatch" loops, handling chaotic multimodal inputs (WhatsApp/SMS/Images) using a dual-agent orchestrator—culminating in a live, interactive Command Center dashboard backed by high-integrity Google Cloud infrastructure.
 
-## 📺 Watch the 2-Minute Video Demo
+## 📺 Watch the 5-Minute Video Demo
 
-[Insert YouTube Link Here]
+**[Video Demo Link → https://youtu.be/iz3ftYpZta8](https://youtu.be/iz3ftYpZta8)**
+
+> ⚠️ **Note for Judges (Evaluation Guide):**
+> To test the live capabilities of AgentBanjir, please use the **Mock Submission Form** directly on the Web Dashboard. 
+> *The WhatsApp/Twilio integration demonstrated in our video uses a Twilio Sandbox Trial account, which strictly limits outbound SMS replies to verified developer phone numbers. The end-to-end Twilio ingress is fully functional, but third-party phone numbers will not receive the automated SMS reply.*
 
 ### 🚨 The Problem: Crisis Data Chaos
 During rapid flooding events, emergency dispatchers are overwhelmed by a deluge of fragmented text messages, unverified images, and incomplete location pins. Traditional response lines become bottlenecks, where critical data is lost in the noise, delaying life-saving interventions.
@@ -49,7 +53,7 @@ During rapid flooding events, emergency dispatchers are overwhelmed by a deluge 
 
 **Stateless WhatsApp Ingress:** Engineered a **high-integrity Twilio webhook** with a 15-second async acknowledge bypass. By decoupling the `200 OK` response from the heavy AI processing, the system prevents upstream timeouts while maintaining a resilient background pipeline for Supabase persistence and autonomous dispatching.
 
-![WhatsApp Distress-to-Dispatch Flow](docs/assets/whatsapp-demo-placeholder.jpeg)
+![WhatsApp Distress-to-Dispatch Flow](docs/assets/whatsapp-demo-placeholder.png)
 
 **Resilient Resource Allocation:** Optimized for **scalable GenAI workloads** on Google Cloud Run with 2GiB RAM and a 300s timeout. This prevents Out-Of-Memory (OOM) kills during multimodal image analysis and ensures complex RAG queries finish within the request window, providing a stable backbone for emergency services.
 
