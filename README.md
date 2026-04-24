@@ -13,7 +13,9 @@
 
 ## 📺 Watch the 5-Minute Video Demo
 
-**[Video Demo Link → https://youtu.be/iz3ftYpZta8](https://youtu.be/iz3ftYpZta8)**
+<div align="center">
+
+📷 **[Video Demo Link → https://youtu.be/iz3ftYpZta8](https://youtu.be/iz3ftYpZta8)**
 
 > ⚠️ **Note for Judges (Evaluation Guide):**
 > To test the live capabilities of AgentBanjir, please use the **Mock Submission Form** directly on the Web Dashboard. 
